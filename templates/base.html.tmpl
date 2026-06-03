@@ -185,8 +185,23 @@
       padding-left: 0;
     }
 
+    ul:has(> li > input[type="checkbox"]) > li {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 0.4rem;
+    }
+
     ul > li > input[type="checkbox"] {
-      margin-right: 0.5rem;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .ingredient-note {
+      display: block;
+      opacity: 0.6;
+      font-size: 0.85em;
     }
   </style>
 </head>

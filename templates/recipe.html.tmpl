@@ -28,7 +28,7 @@
       {{else if .Display}}
         <li><input type="checkbox"> {{md .Display}}</li>
       {{else}}
-        <li><input type="checkbox"> {{if .AmountStr}}<strong>{{.AmountStr}}</strong> {{end}}{{.FoodStr}}{{if .NoteStr}} {{.NoteStr}}{{end}}</li>
+        <li><input type="checkbox"> {{if .AmountStr}}<strong>{{.AmountStr}}</strong> {{end}}{{.FoodStr}}{{if .NoteStr}}<span class="ingredient-note">{{.NoteStr}}</span>{{end}}</li>
       {{end}}
     {{end}}
     </ul>
