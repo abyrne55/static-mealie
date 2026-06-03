@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'none';">
+  <title>{{block "title" .}}{{.SiteTitle}}{{end}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+  <style>
+    :root {
+      --bg: #faf9f4;
+      --accent-bg: #f0efe8;
+      --text: #2c2c24;
+      --text-light: #6b6b5e;
+      --border: #d8d7ce;
+      --accent: #5a7a4a;
+      --accent-hover: #486838;
+      --accent-text: #fff;
+      --code: #5c7a3a;
+      --preformatted: #3a4228;
+      --marked: #e8ecd0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1e16;
+        --accent-bg: #242820;
+        --text: #ddddd2;
+        --text-light: #9a9a8e;
+        --border: #3a3e32;
+        --accent: #8ab46e;
+        --accent-hover: #9ec484;
+        --accent-text: #1a1e16;
+        --code: #a0c47a;
+        --preformatted: #c0c8a8;
+        --marked: #3a4428;
+      }
+    }
+
+    body::before {
+      content: '';
+      display: block;
+      height: 3px;
+      background: var(--accent);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    body { padding-top: 3px; }
+
+    h1, h2, h3 {
+      font-family: 'IBM Plex Serif', Georgia, serif;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .recipe-list {
+      margin-top: 1.5rem;
+    }
+
+    .recipe-entry {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: opacity 0.15s;
+    }
+
+    .recipe-entry:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .recipe-entry:hover {
+      opacity: 0.7;
+    }
+
+    .recipe-thumb {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .recipe-entry h2 {
+      margin: 0 0 0.1rem;
+      font-size: 1.15rem;
+      border-bottom: none;
+      padding-bottom: 0;
+      color: var(--text);
+    }
+
+    .recipe-entry time {
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+
+    .recipe-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 0.5rem 0 1.5rem;
+    }
+
+    .recipe-meta {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    ul:has(> li > input[type="checkbox"]) {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul > li > input[type="checkbox"] {
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    {{block "content" .}}{{end}}
+  </main>
+</body>
+</html>

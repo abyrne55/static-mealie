@@ -1,0 +1,59 @@
+{{define "title"}}{{.Recipe.Name}} &mdash; {{.SiteTitle}}{{end}}
+{{define "content"}}
+  <a href="/" class="back-link">&larr; All recipes</a>
+  <article>
+    <h1>{{.Recipe.Name}}</h1>
+    <p class="recipe-meta">
+      <time datetime="{{.Recipe.DateISO}}">{{.Recipe.DateFormatted}}</time>
+       &middot; <a href="/{{.Recipe.Slug}}/recipe.md">raw</a>
+    </p>
+    {{if .Recipe.HasImage}}
+      <img src="/{{.Recipe.Slug}}/image.webp" alt="{{.Recipe.Name}}" class="recipe-image">
+    {{end}}
+    {{if .Recipe.Description}}<p>{{.Recipe.Description}}</p>{{end}}
+    <ul>
+    {{if .Recipe.RecipeYield}}<li><strong>Servings</strong>: {{.Recipe.RecipeYield}}</li>{{end}}
+    {{if .Recipe.PrepTime}}<li><strong>Prep Time</strong>: {{.Recipe.PrepTime}}</li>{{end}}
+    {{if .Recipe.CookTime}}<li><strong>Cook Time</strong>: {{.Recipe.CookTime}}</li>{{end}}
+    {{if .Recipe.TotalTime}}<li><strong>Total Time</strong>: {{.Recipe.TotalTime}}</li>{{end}}
+    {{if .Recipe.PerformTime}}<li><strong>Perform Time</strong>: {{.Recipe.PerformTime}}</li>{{end}}
+    </ul>
+    <h2>Ingredients</h2>
+    <ul>
+    {{range .Recipe.Ingredients}}
+      {{if .IsHeading}}
+    </ul>
+    <h3>{{.Heading}}</h3>
+    <ul>
+      {{else if .Display}}
+        <li><input type="checkbox"> {{md .Display}}</li>
+      {{else}}
+        <li><input type="checkbox"> {{if .AmountStr}}<strong>{{.AmountStr}}</strong> {{end}}{{.FoodStr}}{{if .NoteStr}} {{.NoteStr}}{{end}}</li>
+      {{end}}
+    {{end}}
+    </ul>
+
+    <h2>Instructions</h2>
+    <ol>
+    {{range .Recipe.Instructions}}
+      {{if .Title}}<li><strong>{{.Title}}</strong><br>{{md .Text}}</li>
+      {{else}}<li>{{md .Text}}</li>
+      {{end}}
+    {{end}}
+    </ol>
+
+    {{if .Recipe.Notes}}
+    <h2>Notes</h2>
+    {{range .Recipe.Notes}}
+      {{if .Title}}<h3>{{.Title}}</h3>{{end}}
+      <p>{{md .Text}}</p>
+    {{end}}
+    {{end}}
+
+    {{if .Recipe.OrgURL}}
+    <p><em>Recipe Source</em>: <a href="{{.Recipe.OrgURL}}">{{.Recipe.OrgURL}}</a></p>
+    {{end}}
+  </article>
+
+  {{.JSONLD}}
+{{end}}

@@ -1,0 +1,37 @@
+# {{.Name}}
+
+{{if .Description}}{{.Description}}
+
+{{end}}{{if .RecipeYield}}- **Servings**: {{.RecipeYield}}
+{{end}}{{if .PrepTime}}- **Prep Time**: {{.PrepTime}}
+{{end}}{{if .CookTime}}- **Cook Time**: {{.CookTime}}
+{{end}}{{if .TotalTime}}- **Total Time**: {{.TotalTime}}
+{{end}}
+## Ingredients
+{{range .Ingredients}}
+{{- if .IsHeading}}
+### {{.Heading}}
+{{else if .Display}}
+- [ ] {{.Display}}
+{{- else}}
+- [ ] {{if .AmountStr}}{{.AmountStr}} {{end}}{{.FoodStr}}{{if .NoteStr}} {{.NoteStr}}{{end}}
+{{- end}}
+{{- end}}
+
+## Instructions
+{{range $i, $step := .Instructions}}
+{{inc $i}}. {{$step.Text}}
+{{- end}}
+{{if .Notes}}
+## Notes
+{{range .Notes}}
+{{- if .Title}}
+### {{.Title}}
+{{end}}
+{{.Text}}
+{{end}}
+{{- end}}
+{{- if .OrgURL}}
+
+*Recipe Source*: "{{.OrgURL}}"
+{{- end}}
