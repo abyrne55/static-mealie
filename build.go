@@ -251,6 +251,7 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 		if err != nil {
 			return fmt.Errorf("create recipe md %s: %w", rv.Slug, err)
 		}
+		mdFile.Write([]byte("\xEF\xBB\xBF")) // UTF-8 BOM so browsers don't fall back to Latin-1
 		if err := mdT.Execute(mdFile, rv); err != nil {
 			mdFile.Close()
 			return fmt.Errorf("execute md template %s: %w", rv.Slug, err)

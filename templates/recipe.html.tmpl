@@ -5,12 +5,12 @@
     <h1>{{.Recipe.Name}}</h1>
     <p class="recipe-meta">
       <time datetime="{{.Recipe.DateISO}}">{{.Recipe.DateFormatted}}</time>
-       &middot; <a href="/{{.Recipe.Slug}}/recipe.md">raw</a>
+       &middot; <a href="/{{.Recipe.Slug}}/recipe.md">View as Markdown</a>
     </p>
     {{if .Recipe.HasImage}}
       <img src="/{{.Recipe.Slug}}/image.webp" alt="{{.Recipe.Name}}" class="recipe-image">
     {{end}}
-    {{if .Recipe.Description}}<p>{{.Recipe.Description}}</p>{{end}}
+    {{if .Recipe.Description}}<p>{{md .Recipe.Description}}</p>{{end}}
     <ul>
     {{if .Recipe.RecipeYield}}<li><strong>Servings</strong>: {{.Recipe.RecipeYield}}</li>{{end}}
     {{if .Recipe.PrepTime}}<li><strong>Prep Time</strong>: {{.Recipe.PrepTime}}</li>{{end}}
@@ -48,10 +48,6 @@
       {{if .Title}}<h3>{{.Title}}</h3>{{end}}
       <p>{{md .Text}}</p>
     {{end}}
-    {{end}}
-
-    {{if .Recipe.OrgURL}}
-    <p><em>Recipe Source</em>: <a href="{{.Recipe.OrgURL}}">{{.Recipe.OrgURL}}</a></p>
     {{end}}
   </article>
 
