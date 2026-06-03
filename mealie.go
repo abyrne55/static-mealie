@@ -42,7 +42,8 @@ type Recipe struct {
 	Name               string              `json:"name"`
 	Slug               string              `json:"slug"`
 	Image              any                 `json:"image"`
-	RecipeYield        string              `json:"recipeYield"`
+	RecipeYield            string              `json:"recipeYield"`
+	RecipeYieldQuantity    float64             `json:"recipeYieldQuantity"`
 	TotalTime          string              `json:"totalTime"`
 	PrepTime           string              `json:"prepTime"`
 	CookTime           string              `json:"cookTime"`

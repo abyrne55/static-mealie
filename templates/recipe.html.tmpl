@@ -11,13 +11,13 @@
       <img src="/{{.Recipe.Slug}}/image.webp" alt="{{.Recipe.Name}}" class="recipe-image">
     {{end}}
     {{if .Recipe.Description}}<p>{{md .Recipe.Description}}</p>{{end}}
-    <ul>
-    {{if .Recipe.RecipeYield}}<li><strong>Servings</strong>: {{.Recipe.RecipeYield}}</li>{{end}}
-    {{if .Recipe.PrepTime}}<li><strong>Prep Time</strong>: {{.Recipe.PrepTime}}</li>{{end}}
-    {{if .Recipe.CookTime}}<li><strong>Cook Time</strong>: {{.Recipe.CookTime}}</li>{{end}}
-    {{if .Recipe.TotalTime}}<li><strong>Total Time</strong>: {{.Recipe.TotalTime}}</li>{{end}}
-    {{if .Recipe.PerformTime}}<li><strong>Perform Time</strong>: {{.Recipe.PerformTime}}</li>{{end}}
-    </ul>
+    <div class="recipe-details">
+    {{if .Recipe.RecipeYield}}<div class="recipe-detail"><span class="detail-label">Servings</span><span class="detail-value">{{.Recipe.RecipeYield}}</span></div>{{end}}
+    {{if .Recipe.PrepTime}}<div class="recipe-detail"><span class="detail-label">Prep Time</span><span class="detail-value">{{.Recipe.PrepTime}}</span></div>{{end}}
+    {{if .Recipe.CookTime}}<div class="recipe-detail"><span class="detail-label">Cook Time</span><span class="detail-value">{{.Recipe.CookTime}}</span></div>{{end}}
+    {{if .Recipe.PerformTime}}<div class="recipe-detail"><span class="detail-label">Active Time</span><span class="detail-value">{{.Recipe.PerformTime}}</span></div>{{end}}
+    {{if .Recipe.TotalTime}}<div class="recipe-detail"><span class="detail-label">Total Time</span><span class="detail-value">{{.Recipe.TotalTime}}</span></div>{{end}}
+    </div>
     <h2>Ingredients</h2>
     <ul>
     {{range .Recipe.Ingredients}}

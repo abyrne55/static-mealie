@@ -74,12 +74,30 @@ type SchemaStep struct {
 	Text string `json:"text"`
 }
 
+func formatYield(yield string, qty float64) string {
+	if qty > 0 && yield != "" {
+		q := int(qty)
+		if float64(q) == qty {
+			return fmt.Sprintf("%d %s", q, yield)
+		}
+		return fmt.Sprintf("%g %s", qty, yield)
+	}
+	if qty > 0 {
+		q := int(qty)
+		if float64(q) == qty {
+			return fmt.Sprintf("%d", q)
+		}
+		return fmt.Sprintf("%g", qty)
+	}
+	return yield
+}
+
 func recipeToView(r Recipe, hasImage bool) RecipeView {
 	rv := RecipeView{
 		Name:        r.Name,
 		Slug:        r.Slug,
 		Description: r.Description,
-		RecipeYield: r.RecipeYield,
+		RecipeYield: formatYield(r.RecipeYield, r.RecipeYieldQuantity),
 		PrepTime:    r.PrepTime,
 		CookTime:    r.CookTime,
 		TotalTime:   r.TotalTime,
