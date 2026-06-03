@@ -14,7 +14,7 @@
 {{else if .Display}}
 - [ ] {{.Display}}
 {{- else}}
-- [ ] {{if .AmountStr}}{{.AmountStr}} {{end}}{{.FoodStr}}{{if .NoteStr}} {{.NoteStr}}{{end}}
+- [ ] {{if .AmountStr}}{{.AmountStr}} {{end}}{{.FoodStr}}{{if .NoteStr}}, {{.NoteStr}}{{end}}
 {{- end}}
 {{- end}}
 

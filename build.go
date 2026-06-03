@@ -156,10 +156,10 @@ func buildJSONLD(rv RecipeView, siteURL string) (template.HTML, error) {
 			if ing.FoodStr != "" {
 				parts = append(parts, ing.FoodStr)
 			}
-			if ing.NoteStr != "" {
-				parts = append(parts, ing.NoteStr)
-			}
 			s = strings.Join(parts, " ")
+			if ing.NoteStr != "" {
+				s += ", " + ing.NoteStr
+			}
 		}
 		if s != "" {
 			sr.RecipeIngredient = append(sr.RecipeIngredient, s)
