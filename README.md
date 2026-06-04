@@ -23,28 +23,30 @@ go build -o static-mealie .
 ## Usage
 
 ```sh
-static-mealie --url https://your-mealie-instance --token your-token
+static-mealie --mealie-url https://your-mealie-instance --mealie-token your-token
 ```
 
 ### Flags
 
 ```
---url string       Mealie base URL (env: MEALIE_URL)
---token string     API token or file:///path (env: MEALIE_STATIC_TOKEN)
---out string       Output directory (default: "public")
---title string     Site title (default: "Recipes")
---site-url string  Base URL for sitemap/links (default: "/")
--v                 Verbose logging
+--mealie-url string      Mealie base URL (env: SM_MEALIE_URL)
+--mealie-token string    API token or file:///path (env: SM_MEALIE_TOKEN)
+--out-dir string         Output directory (default: "public", env: SM_OUT_DIR)
+--out-title string       Site title (default: "Recipes", env: SM_OUT_TITLE)
+--out-base-url string    Base URL for sitemap/links; output not standards-compliant
+                         unless set to an absolute URL like https://example.com
+                         (default: "/", env: SM_OUT_BASE_URL)
+-v                       Verbose logging
 ```
 
 ### Token Resolution
 
 The API token is resolved from the first available source:
 
-1. `--token` flag (supports `file:///path/to/token`)
-2. `MEALIE_STATIC_TOKEN` env var (supports `file:///path/to/token`)
-3. `/run/credentials/mealie-static-token` file
-4. `/run/secrets/mealie-static-token` file
+1. `--mealie-token` flag (supports `file:///path/to/token`)
+2. `SM_MEALIE_TOKEN` env var (supports `file:///path/to/token`)
+3. `/run/credentials/static-mealie-token` file
+4. `/run/secrets/static-mealie-token` file
 
 The credential file paths match the default mount points for Podman secrets and Kubernetes secrets/projected volumes.
 
@@ -54,15 +56,15 @@ Images are published to `ghcr.io/abyrne55/static-mealie` for `linux/amd64` and `
 
 ```sh
 # Store your API token as a Podman secret
-podman secret create mealie-static-token /path/to/token
+podman secret create static-mealie-token /path/to/token
 
 # Generate the site into ./output
 podman run --rm \
   -v ./output:/output:U,Z \
-  --secret mealie-static-token \
+  --secret static-mealie-token \
   ghcr.io/abyrne55/static-mealie:main \
-  --url https://your-mealie-instance \
-  --out /output
+  --mealie-url https://your-mealie-instance \
+  --out-dir /output
 ```
 
 ## Output Structure

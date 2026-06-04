@@ -10,11 +10,11 @@ import (
 
 func main() {
 	var (
-		urlFlag     = flag.String("url", "", "Mealie base URL (env: MEALIE_URL)")
-		tokenFlag   = flag.String("token", "", "API token or file:///path (env: MEALIE_STATIC_TOKEN)")
-		outFlag     = flag.String("out", "public", "Output directory")
-		titleFlag   = flag.String("title", "Recipes", "Site title")
-		siteURLFlag = flag.String("site-url", "/", "Base URL for sitemap/links")
+		urlFlag     = flag.String("mealie-url", "", "Mealie base URL (env: SM_MEALIE_URL)")
+		tokenFlag   = flag.String("mealie-token", "", "API token or file:///path (env: SM_MEALIE_TOKEN)")
+		outFlag     = flag.String("out-dir", "public", "Output directory (env: SM_OUT_DIR)")
+		titleFlag   = flag.String("out-title", "Recipes", "Site title (env: SM_OUT_TITLE)")
+		siteURLFlag = flag.String("out-base-url", "/", "Base URL for sitemap/links; output not standards-compliant unless set to an absolute URL like https://example.com (env: SM_OUT_BASE_URL)")
 		verbose     = flag.Bool("v", false, "Verbose logging")
 	)
 	flag.Parse()
@@ -27,22 +27,22 @@ func main() {
 
 	mealieURL := *urlFlag
 	if mealieURL == "" {
-		mealieURL = os.Getenv("MEALIE_URL")
+		mealieURL = os.Getenv("SM_MEALIE_URL")
 	}
 	if mealieURL == "" {
-		fmt.Fprintln(os.Stderr, "error: --url or MEALIE_URL required")
+		fmt.Fprintln(os.Stderr, "error: --mealie-url or SM_MEALIE_URL required")
 		flag.Usage()
 		os.Exit(1)
 	}
 
 	credentialFiles := []string{
-		"/run/credentials/mealie-static-token",
-		"/run/secrets/mealie-static-token",
+		"/run/credentials/static-mealie-token",
+		"/run/secrets/static-mealie-token",
 	}
 
 	token := *tokenFlag
 	if token == "" {
-		token = os.Getenv("MEALIE_STATIC_TOKEN")
+		token = os.Getenv("SM_MEALIE_TOKEN")
 	}
 	if token != "" {
 		resolved, err := resolveToken(token)
@@ -64,7 +64,7 @@ func main() {
 		}
 	}
 	if token == "" {
-		fmt.Fprintln(os.Stderr, "error: no API token found; tried --token flag, MEALIE_STATIC_TOKEN env var, /run/credentials/mealie-static-token, /run/secrets/mealie-static-token")
+		fmt.Fprintln(os.Stderr, "error: no API token found; tried --mealie-token flag, SM_MEALIE_TOKEN env var, /run/credentials/static-mealie-token, /run/secrets/static-mealie-token")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -100,19 +100,48 @@ func main() {
 		}
 	}
 
-	site := &Site{
-		Title:   *titleFlag,
-		SiteURL: *siteURLFlag,
-		OutDir:  *outFlag,
+	outDir := *outFlag
+	if !isFlagSet("out-dir") {
+		if v := os.Getenv("SM_OUT_DIR"); v != "" {
+			outDir = v
+		}
+	}
+	title := *titleFlag
+	if !isFlagSet("out-title") {
+		if v := os.Getenv("SM_OUT_TITLE"); v != "" {
+			title = v
+		}
+	}
+	siteURL := *siteURLFlag
+	if !isFlagSet("out-base-url") {
+		if v := os.Getenv("SM_OUT_BASE_URL"); v != "" {
+			siteURL = v
+		}
 	}
 
-	slog.Info("building site", "out", *outFlag)
+	site := &Site{
+		Title:   title,
+		SiteURL: siteURL,
+		OutDir:  outDir,
+	}
+
+	slog.Info("building site", "out", outDir)
 	if err := site.Build(recipes, images); err != nil {
 		fmt.Fprintf(os.Stderr, "error building site: %v\n", err)
 		os.Exit(1)
 	}
 
-	slog.Info("done", "recipes", len(recipes), "images", len(images), "out", *outFlag)
+	slog.Info("done", "recipes", len(recipes), "images", len(images), "out", outDir)
+}
+
+func isFlagSet(name string) bool {
+	found := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
 }
 
 func resolveToken(token string) (string, error) {
