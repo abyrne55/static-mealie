@@ -23,18 +23,18 @@ go build -o static-mealie .
 ## Usage
 
 ```sh
-static-mealie -url https://your-mealie-instance -token your-token
+static-mealie --url https://your-mealie-instance --token your-token
 ```
 
 ### Flags
 
 ```
--url string       Mealie base URL (env: MEALIE_URL)
--token string     API token or file:///path (env: MEALIE_TOKEN)
--out string       Output directory (default: "public")
--title string     Site title (default: "Recipes")
--site-url string  Base URL for sitemap/links (default: "/")
--v                Verbose logging
+--url string       Mealie base URL (env: MEALIE_URL)
+--token string     API token or file:///path (env: MEALIE_TOKEN)
+--out string       Output directory (default: "public")
+--title string     Site title (default: "Recipes")
+--site-url string  Base URL for sitemap/links (default: "/")
+-v                 Verbose logging
 ```
 
 ### Environment Variables
@@ -49,7 +49,7 @@ Flags take precedence over environment variables.
 To avoid exposing your API token in shell history:
 
 ```sh
-static-mealie -url https://your-mealie-instance -token file:///path/to/token
+static-mealie --url https://your-mealie-instance --token file:///path/to/token
 ```
 
 ## Container
@@ -65,9 +65,9 @@ podman run --rm \
   -v ./output:/output:U,Z \
   --secret mealie-api-key \
   ghcr.io/abyrne55/static-mealie:main \
-  -url https://your-mealie-instance \
-  -token file:///run/secrets/mealie-api-key \
-  -out /output
+  --url https://your-mealie-instance \
+  --token file:///run/secrets/mealie-api-key \
+  --out /output
 ```
 
 ## Output Structure

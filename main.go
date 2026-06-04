@@ -30,7 +30,7 @@ func main() {
 		mealieURL = os.Getenv("MEALIE_URL")
 	}
 	if mealieURL == "" {
-		fmt.Fprintln(os.Stderr, "error: -url or MEALIE_URL required")
+		fmt.Fprintln(os.Stderr, "error: --url or MEALIE_URL required")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -40,7 +40,7 @@ func main() {
 		token = os.Getenv("MEALIE_TOKEN")
 	}
 	if token == "" {
-		fmt.Fprintln(os.Stderr, "error: -token or MEALIE_TOKEN required")
+		fmt.Fprintln(os.Stderr, "error: --token or MEALIE_TOKEN required")
 		flag.Usage()
 		os.Exit(1)
 	}
