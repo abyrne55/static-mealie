@@ -52,6 +52,24 @@ To avoid exposing your API token in shell history:
 static-mealie -url https://your-mealie-instance -token file:///path/to/token
 ```
 
+## Container
+
+Images are published to `ghcr.io/abyrne55/static-mealie` for `linux/amd64` and `linux/arm64`.
+
+```sh
+# Store your API token as a Podman secret
+podman secret create mealie-api-key /path/to/token
+
+# Generate the site into ./output
+podman run --rm \
+  -v ./output:/output:U,Z \
+  --secret mealie-api-key \
+  ghcr.io/abyrne55/static-mealie:main \
+  -url https://your-mealie-instance \
+  -token file:///run/secrets/mealie-api-key \
+  -out /output
+```
+
 ## Output Structure
 
 ```
