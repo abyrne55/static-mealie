@@ -29,9 +29,9 @@ func TestGetAllRecipesPagination(t *testing.T) {
 		q := r.URL.Query()
 		switch q.Get("page") {
 		case "1", "":
-			json.NewEncoder(w).Encode(page1)
+			_ = json.NewEncoder(w).Encode(page1)
 		case "2":
-			json.NewEncoder(w).Encode(page2)
+			_ = json.NewEncoder(w).Encode(page2)
 		}
 	}))
 	defer srv.Close()
@@ -63,7 +63,7 @@ func TestGetRecipe(t *testing.T) {
 			http.NotFound(w, r)
 			return
 		}
-		json.NewEncoder(w).Encode(recipe)
+		_ = json.NewEncoder(w).Encode(recipe)
 	}))
 	defer srv.Close()
 
@@ -86,7 +86,7 @@ func TestGetRecipe(t *testing.T) {
 func TestGetRecipeImage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/media/recipes/abc/images/original.webp" {
-			w.Write([]byte("fake-image-data"))
+			_, _ = w.Write([]byte("fake-image-data"))
 			return
 		}
 		if r.URL.Path == "/api/media/recipes/none/images/original.webp" {

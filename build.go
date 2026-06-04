@@ -268,9 +268,12 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 		if err != nil {
 			return fmt.Errorf("create index.html: %w", err)
 		}
-		defer indexFile.Close()
 		if err := indexT.ExecuteTemplate(indexFile, "base.html.tmpl", IndexData{SiteTitle: s.Title, Recipes: views}); err != nil {
+			_ = indexFile.Close()
 			return fmt.Errorf("execute index template: %w", err)
+		}
+		if err := indexFile.Close(); err != nil {
+			return fmt.Errorf("close index.html: %w", err)
 		}
 	}
 
@@ -292,10 +295,12 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 				return fmt.Errorf("create recipe html %s: %w", rv.Slug, err)
 			}
 			if err := recipeT.ExecuteTemplate(htmlFile, "base.html.tmpl", RecipeData{SiteTitle: s.Title, Recipe: rv, JSONLD: jsonLD}); err != nil {
-				htmlFile.Close()
+				_ = htmlFile.Close()
 				return fmt.Errorf("execute recipe template %s: %w", rv.Slug, err)
 			}
-			htmlFile.Close()
+			if err := htmlFile.Close(); err != nil {
+				return fmt.Errorf("close recipe html %s: %w", rv.Slug, err)
+			}
 		}
 
 		recipeMDPath := filepath.Join(recipeDir, "recipe.md")
@@ -304,12 +309,17 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 			if err != nil {
 				return fmt.Errorf("create recipe md %s: %w", rv.Slug, err)
 			}
-			mdFile.Write([]byte("\xEF\xBB\xBF")) // UTF-8 BOM so browsers don't fall back to Latin-1
+			if _, err := mdFile.Write([]byte("\xEF\xBB\xBF")); err != nil { // UTF-8 BOM so browsers don't fall back to Latin-1
+				_ = mdFile.Close()
+				return fmt.Errorf("write BOM for %s: %w", rv.Slug, err)
+			}
 			if err := mdT.Execute(mdFile, rv); err != nil {
-				mdFile.Close()
+				_ = mdFile.Close()
 				return fmt.Errorf("execute md template %s: %w", rv.Slug, err)
 			}
-			mdFile.Close()
+			if err := mdFile.Close(); err != nil {
+				return fmt.Errorf("close recipe md %s: %w", rv.Slug, err)
+			}
 		}
 	}
 
@@ -340,11 +350,14 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 	if err != nil {
 		return fmt.Errorf("create sitemap.xml: %w", err)
 	}
-	defer sitemapFile.Close()
 
 	siteURL := strings.TrimRight(s.SiteURL, "/") + "/"
 	if err := sitemapT.Execute(sitemapFile, SitemapData{SiteURL: siteURL, Recipes: views}); err != nil {
+		_ = sitemapFile.Close()
 		return fmt.Errorf("execute sitemap template: %w", err)
+	}
+	if err := sitemapFile.Close(); err != nil {
+		return fmt.Errorf("close sitemap.xml: %w", err)
 	}
 
 	return nil
