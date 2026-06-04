@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -18,9 +19,22 @@ import (
 var templateFS embed.FS
 
 type Site struct {
-	Title   string
-	SiteURL string
-	OutDir  string
+	Title      string
+	SiteURL    string
+	OutDir     string
+	CleanSlate bool
+	NoClobber  bool
+}
+
+func (s *Site) skipIfExists(path string) bool {
+	if !s.NoClobber {
+		return false
+	}
+	if _, err := os.Stat(path); err == nil {
+		slog.Debug("no-clobber: skipping existing file", "path", path)
+		return true
+	}
+	return false
 }
 
 type RecipeView struct {
@@ -235,13 +249,29 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 		return fmt.Errorf("create output dir: %w", err)
 	}
 
-	indexFile, err := os.Create(filepath.Join(s.OutDir, "index.html"))
-	if err != nil {
-		return fmt.Errorf("create index.html: %w", err)
+	if s.CleanSlate {
+		slog.Debug("clean-slate: wiping output directory", "path", s.OutDir)
+		entries, err := os.ReadDir(s.OutDir)
+		if err != nil {
+			return fmt.Errorf("read output dir for clean-slate: %w", err)
+		}
+		for _, e := range entries {
+			if err := os.RemoveAll(filepath.Join(s.OutDir, e.Name())); err != nil {
+				return fmt.Errorf("clean-slate remove %s: %w", e.Name(), err)
+			}
+		}
 	}
-	defer indexFile.Close()
-	if err := indexT.ExecuteTemplate(indexFile, "base.html.tmpl", IndexData{SiteTitle: s.Title, Recipes: views}); err != nil {
-		return fmt.Errorf("execute index template: %w", err)
+
+	indexPath := filepath.Join(s.OutDir, "index.html")
+	if !s.skipIfExists(indexPath) {
+		indexFile, err := os.Create(indexPath)
+		if err != nil {
+			return fmt.Errorf("create index.html: %w", err)
+		}
+		defer indexFile.Close()
+		if err := indexT.ExecuteTemplate(indexFile, "base.html.tmpl", IndexData{SiteTitle: s.Title, Recipes: views}); err != nil {
+			return fmt.Errorf("execute index template: %w", err)
+		}
 	}
 
 	for _, rv := range views {
@@ -250,31 +280,37 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 			return fmt.Errorf("create recipe dir %s: %w", rv.Slug, err)
 		}
 
-		jsonLD, err := buildJSONLD(rv, s.SiteURL)
-		if err != nil {
-			return fmt.Errorf("build JSON-LD for %s: %w", rv.Slug, err)
-		}
+		recipeHTMLPath := filepath.Join(recipeDir, "index.html")
+		if !s.skipIfExists(recipeHTMLPath) {
+			jsonLD, err := buildJSONLD(rv, s.SiteURL)
+			if err != nil {
+				return fmt.Errorf("build JSON-LD for %s: %w", rv.Slug, err)
+			}
 
-		htmlFile, err := os.Create(filepath.Join(recipeDir, "index.html"))
-		if err != nil {
-			return fmt.Errorf("create recipe html %s: %w", rv.Slug, err)
-		}
-		if err := recipeT.ExecuteTemplate(htmlFile, "base.html.tmpl", RecipeData{SiteTitle: s.Title, Recipe: rv, JSONLD: jsonLD}); err != nil {
+			htmlFile, err := os.Create(recipeHTMLPath)
+			if err != nil {
+				return fmt.Errorf("create recipe html %s: %w", rv.Slug, err)
+			}
+			if err := recipeT.ExecuteTemplate(htmlFile, "base.html.tmpl", RecipeData{SiteTitle: s.Title, Recipe: rv, JSONLD: jsonLD}); err != nil {
+				htmlFile.Close()
+				return fmt.Errorf("execute recipe template %s: %w", rv.Slug, err)
+			}
 			htmlFile.Close()
-			return fmt.Errorf("execute recipe template %s: %w", rv.Slug, err)
 		}
-		htmlFile.Close()
 
-		mdFile, err := os.Create(filepath.Join(recipeDir, "recipe.md"))
-		if err != nil {
-			return fmt.Errorf("create recipe md %s: %w", rv.Slug, err)
-		}
-		mdFile.Write([]byte("\xEF\xBB\xBF")) // UTF-8 BOM so browsers don't fall back to Latin-1
-		if err := mdT.Execute(mdFile, rv); err != nil {
+		recipeMDPath := filepath.Join(recipeDir, "recipe.md")
+		if !s.skipIfExists(recipeMDPath) {
+			mdFile, err := os.Create(recipeMDPath)
+			if err != nil {
+				return fmt.Errorf("create recipe md %s: %w", rv.Slug, err)
+			}
+			mdFile.Write([]byte("\xEF\xBB\xBF")) // UTF-8 BOM so browsers don't fall back to Latin-1
+			if err := mdT.Execute(mdFile, rv); err != nil {
+				mdFile.Close()
+				return fmt.Errorf("execute md template %s: %w", rv.Slug, err)
+			}
 			mdFile.Close()
-			return fmt.Errorf("execute md template %s: %w", rv.Slug, err)
 		}
-		mdFile.Close()
 	}
 
 	for id, data := range images {
@@ -289,12 +325,18 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 			continue
 		}
 		imgPath := filepath.Join(s.OutDir, slug, "image.webp")
-		if err := os.WriteFile(imgPath, data, 0o644); err != nil {
-			return fmt.Errorf("write image %s: %w", slug, err)
+		if !s.skipIfExists(imgPath) {
+			if err := os.WriteFile(imgPath, data, 0o644); err != nil {
+				return fmt.Errorf("write image %s: %w", slug, err)
+			}
 		}
 	}
 
-	sitemapFile, err := os.Create(filepath.Join(s.OutDir, "sitemap.xml"))
+	sitemapPath := filepath.Join(s.OutDir, "sitemap.xml")
+	if s.skipIfExists(sitemapPath) {
+		return nil
+	}
+	sitemapFile, err := os.Create(sitemapPath)
 	if err != nil {
 		return fmt.Errorf("create sitemap.xml: %w", err)
 	}

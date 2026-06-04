@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -14,8 +15,10 @@ func main() {
 		tokenFlag   = flag.String("mealie-token", "", "API token or file:///path (env: SM_MEALIE_TOKEN)")
 		outFlag     = flag.String("out-dir", "public", "Output directory (env: SM_OUT_DIR)")
 		titleFlag   = flag.String("out-title", "Recipes", "Site title (env: SM_OUT_TITLE)")
-		siteURLFlag = flag.String("out-base-url", "/", "Base URL for sitemap/links; output not standards-compliant unless set to an absolute URL like https://example.com (env: SM_OUT_BASE_URL)")
-		verbose     = flag.Bool("v", false, "Verbose logging")
+		siteURLFlag    = flag.String("out-base-url", "/", "Base URL for sitemap/links; output not standards-compliant unless set to an absolute URL like https://example.com (env: SM_OUT_BASE_URL)")
+		cleanSlateFlag = flag.Bool("clean-slate", false, "Wipe output directory before building (env: SM_CLEAN_SLATE)")
+		noClobberFlag  = flag.Bool("no-clobber", false, "Skip files that already exist (env: SM_NO_CLOBBER)")
+		verbose        = flag.Bool("v", false, "Verbose logging")
 	)
 	flag.Parse()
 
@@ -66,6 +69,35 @@ func main() {
 	if token == "" {
 		fmt.Fprintln(os.Stderr, "error: no API token found; tried --mealie-token flag, SM_MEALIE_TOKEN env var, /run/credentials/static-mealie-token, /run/secrets/static-mealie-token")
 		flag.Usage()
+		os.Exit(1)
+	}
+
+	cleanSlate := *cleanSlateFlag
+	if !isFlagSet("clean-slate") {
+		if v := os.Getenv("SM_CLEAN_SLATE"); v != "" {
+			b, err := strconv.ParseBool(v)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: invalid SM_CLEAN_SLATE value %q\n", v)
+				os.Exit(1)
+			}
+			cleanSlate = b
+		}
+	}
+
+	noClobber := *noClobberFlag
+	if !isFlagSet("no-clobber") {
+		if v := os.Getenv("SM_NO_CLOBBER"); v != "" {
+			b, err := strconv.ParseBool(v)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: invalid SM_NO_CLOBBER value %q\n", v)
+				os.Exit(1)
+			}
+			noClobber = b
+		}
+	}
+
+	if cleanSlate && noClobber {
+		fmt.Fprintln(os.Stderr, "error: --clean-slate and --no-clobber are mutually exclusive")
 		os.Exit(1)
 	}
 
@@ -120,9 +152,11 @@ func main() {
 	}
 
 	site := &Site{
-		Title:   title,
-		SiteURL: siteURL,
-		OutDir:  outDir,
+		Title:      title,
+		SiteURL:    siteURL,
+		OutDir:     outDir,
+		CleanSlate: cleanSlate,
+		NoClobber:  noClobber,
 	}
 
 	slog.Info("building site", "out", outDir)

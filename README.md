@@ -36,8 +36,12 @@ static-mealie --mealie-url https://your-mealie-instance --mealie-token your-toke
 --out-base-url string    Base URL for sitemap/links; output not standards-compliant
                          unless set to an absolute URL like https://example.com
                          (default: "/", env: SM_OUT_BASE_URL)
+--clean-slate            Wipe output directory before building (env: SM_CLEAN_SLATE)
+--no-clobber             Skip files that already exist (env: SM_NO_CLOBBER)
 -v                       Verbose logging
 ```
+
+`--clean-slate` and `--no-clobber` are mutually exclusive.
 
 ### Token Resolution
 

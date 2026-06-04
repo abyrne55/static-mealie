@@ -217,6 +217,93 @@ func TestBuildSitemap(t *testing.T) {
 	}
 }
 
+func TestBuildCleanSlate(t *testing.T) {
+	outDir := t.TempDir()
+
+	staleFile := filepath.Join(outDir, "stale.html")
+	if err := os.WriteFile(staleFile, []byte("stale"), 0o644); err != nil {
+		t.Fatalf("write stale file: %v", err)
+	}
+	staleDir := filepath.Join(outDir, "old-recipe")
+	if err := os.MkdirAll(staleDir, 0o755); err != nil {
+		t.Fatalf("create stale dir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(staleDir, "index.html"), []byte("old"), 0o644); err != nil {
+		t.Fatalf("write stale dir file: %v", err)
+	}
+
+	site := &Site{Title: "Recipes", SiteURL: "/", OutDir: outDir, CleanSlate: true}
+	if err := site.Build(testRecipes(), map[string][]byte{"id-1": []byte("img")}); err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	if _, err := os.Stat(staleFile); !os.IsNotExist(err) {
+		t.Error("stale.html should have been removed")
+	}
+	if _, err := os.Stat(staleDir); !os.IsNotExist(err) {
+		t.Error("old-recipe/ should have been removed")
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "index.html")); err != nil {
+		t.Error("fresh index.html should exist")
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "test-pasta/index.html")); err != nil {
+		t.Error("fresh recipe should exist")
+	}
+}
+
+func TestBuildNoClobber(t *testing.T) {
+	outDir := t.TempDir()
+
+	site := &Site{Title: "Recipes", SiteURL: "/", OutDir: outDir}
+	if err := site.Build(testRecipes(), map[string][]byte{"id-1": []byte("original-img")}); err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	sentinel := []byte("hand-edited")
+	if err := os.WriteFile(filepath.Join(outDir, "index.html"), sentinel, 0o644); err != nil {
+		t.Fatalf("write sentinel: %v", err)
+	}
+
+	site.NoClobber = true
+	if err := site.Build(testRecipes(), map[string][]byte{"id-1": []byte("new-img")}); err != nil {
+		t.Fatalf("Build with NoClobber: %v", err)
+	}
+
+	data, _ := os.ReadFile(filepath.Join(outDir, "index.html"))
+	if string(data) != "hand-edited" {
+		t.Error("index.html should have been preserved by no-clobber")
+	}
+
+	imgData, _ := os.ReadFile(filepath.Join(outDir, "test-pasta/image.webp"))
+	if string(imgData) != "original-img" {
+		t.Error("image.webp should have been preserved by no-clobber")
+	}
+}
+
+func TestBuildNoClobberWritesNewFiles(t *testing.T) {
+	outDir := t.TempDir()
+
+	site := &Site{Title: "Recipes", SiteURL: "/", OutDir: outDir, NoClobber: true}
+	if err := site.Build(testRecipes(), map[string][]byte{"id-1": []byte("img")}); err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	expected := []string{
+		"index.html",
+		"sitemap.xml",
+		"test-pasta/index.html",
+		"test-pasta/recipe.md",
+		"test-pasta/image.webp",
+		"simple-salad/index.html",
+		"simple-salad/recipe.md",
+	}
+	for _, path := range expected {
+		if _, err := os.Stat(filepath.Join(outDir, path)); os.IsNotExist(err) {
+			t.Errorf("missing file: %s", path)
+		}
+	}
+}
+
 func TestBuildJSONLD(t *testing.T) {
 	rv := recipeToView(testRecipes()[0], true)
 	jsonLD, err := buildJSONLD(rv, "https://example.com/")
