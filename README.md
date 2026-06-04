@@ -30,27 +30,23 @@ static-mealie --url https://your-mealie-instance --token your-token
 
 ```
 --url string       Mealie base URL (env: MEALIE_URL)
---token string     API token or file:///path (env: MEALIE_TOKEN)
+--token string     API token or file:///path (env: MEALIE_STATIC_TOKEN)
 --out string       Output directory (default: "public")
 --title string     Site title (default: "Recipes")
 --site-url string  Base URL for sitemap/links (default: "/")
 -v                 Verbose logging
 ```
 
-### Environment Variables
+### Token Resolution
 
-Flags take precedence over environment variables.
+The API token is resolved from the first available source:
 
-- `MEALIE_URL` — Mealie base URL
-- `MEALIE_TOKEN` — API token (supports `file:///path/to/token`)
+1. `--token` flag (supports `file:///path/to/token`)
+2. `MEALIE_STATIC_TOKEN` env var (supports `file:///path/to/token`)
+3. `/run/credentials/mealie-static-token` file
+4. `/run/secrets/mealie-static-token` file
 
-### API Token from File
-
-To avoid exposing your API token in shell history:
-
-```sh
-static-mealie --url https://your-mealie-instance --token file:///path/to/token
-```
+The credential file paths match the default mount points for Podman secrets and Kubernetes secrets/projected volumes.
 
 ## Container
 
@@ -58,15 +54,14 @@ Images are published to `ghcr.io/abyrne55/static-mealie` for `linux/amd64` and `
 
 ```sh
 # Store your API token as a Podman secret
-podman secret create mealie-api-key /path/to/token
+podman secret create mealie-static-token /path/to/token
 
 # Generate the site into ./output
 podman run --rm \
   -v ./output:/output:U,Z \
-  --secret mealie-api-key \
+  --secret mealie-static-token \
   ghcr.io/abyrne55/static-mealie:main \
   --url https://your-mealie-instance \
-  --token file:///run/secrets/mealie-api-key \
   --out /output
 ```
 

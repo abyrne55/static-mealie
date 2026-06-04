@@ -11,7 +11,7 @@ import (
 func main() {
 	var (
 		urlFlag     = flag.String("url", "", "Mealie base URL (env: MEALIE_URL)")
-		tokenFlag   = flag.String("token", "", "API token or file:///path (env: MEALIE_TOKEN)")
+		tokenFlag   = flag.String("token", "", "API token or file:///path (env: MEALIE_STATIC_TOKEN)")
 		outFlag     = flag.String("out", "public", "Output directory")
 		titleFlag   = flag.String("title", "Recipes", "Site title")
 		siteURLFlag = flag.String("site-url", "/", "Base URL for sitemap/links")
@@ -35,19 +35,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	token := *tokenFlag
-	if token == "" {
-		token = os.Getenv("MEALIE_TOKEN")
-	}
-	if token == "" {
-		fmt.Fprintln(os.Stderr, "error: --token or MEALIE_TOKEN required")
-		flag.Usage()
-		os.Exit(1)
+	credentialFiles := []string{
+		"/run/credentials/mealie-static-token",
+		"/run/secrets/mealie-static-token",
 	}
 
-	token, err := resolveToken(token)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error resolving token: %v\n", err)
+	token := *tokenFlag
+	if token == "" {
+		token = os.Getenv("MEALIE_STATIC_TOKEN")
+	}
+	if token != "" {
+		resolved, err := resolveToken(token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error resolving token: %v\n", err)
+			os.Exit(1)
+		}
+		token = resolved
+	} else {
+		for _, path := range credentialFiles {
+			data, err := os.ReadFile(path)
+			if err != nil {
+				continue
+			}
+			token = strings.TrimSpace(string(data))
+			if token != "" {
+				break
+			}
+		}
+	}
+	if token == "" {
+		fmt.Fprintln(os.Stderr, "error: no API token found; tried --token flag, MEALIE_STATIC_TOKEN env var, /run/credentials/mealie-static-token, /run/secrets/mealie-static-token")
+		flag.Usage()
 		os.Exit(1)
 	}
 
