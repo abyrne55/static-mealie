@@ -2,20 +2,9 @@
 
 A CLI tool that generates a ready-to-deploy static HTML website full of recipes from your [Mealie](https://mealie.io) instance. Great for sharing your recipes with the world without directly exposing Mealie itself to the internet. Inspired by [iamkirkbater/mealie-markdown-exporter](https://github.com/iamkirkbater/mealie-markdown-exporter).
 
-## How It Works
+## Features
 
-```sh
-static-mealie --mealie-url https://your-mealie-instance --mealie-token your-token
-```
-
-This simple Golang tool...
-
-1. Uses the Mealie API token you provide to fetch all recipes (including their images and notes) from the target Mealie instance.
-2. Renders each recipe into Markdown, JSON-LD (schema.org/Recipe), and HTML (with [Simple.css](https://simplecss.org/) styling).
-3. Generates a top-level listing page and XML sitemap.
-4. Spits all of that out into a directory usable by any static web server.
-
-### Feature Highlights
+This simple Golang tool fetches all recipes (including images and notes) from your Mealie instance via its API, renders each one into multiple formats, generates a listing page and XML sitemap, and writes everything to a directory ready for any static web server.
 
 - Produces completely static websites composed of…
   - …HTML+CSS for your human friends
@@ -80,6 +69,8 @@ go build
 ./static-mealie --help
 ```
 
+## Reference
+
 ### Flags
 
 ```text
@@ -97,8 +88,6 @@ go build
 
 `--clean-slate` and `--no-clobber` are mutually exclusive.
 
-## Technical Details
-
 ### Token Resolution
 
 The API token is resolved from the first available source:
@@ -110,7 +99,7 @@ The API token is resolved from the first available source:
 
 The credential file paths match the default mount points for systemd/quadlet [credentials](https://systemd.io/CREDENTIALS/) (`LoadCredential=`/`$CREDENTIALS_DIRECTORY`) and Podman/K8s [secrets](https://docs.podman.io/en/latest/markdown/podman-secret-create.1.html).
 
-## Output Structure
+### Output Structure
 
 ```text
 output/
@@ -122,7 +111,7 @@ output/
     image.webp      (if recipe has an image)
 ```
 
-## Running Tests
+### Running Tests
 
 ```sh
 go test ./...
