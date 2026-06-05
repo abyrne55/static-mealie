@@ -36,8 +36,12 @@
     <h2>Instructions</h2>
     <ol>
     {{range .Recipe.Instructions}}
-      {{if .Title}}<li><strong>{{.Title}}</strong><br>{{md .Text}}</li>
-      {{else if .Summary}}<li><strong>{{.Summary}}</strong><br>{{md .Text}}</li>
+      {{if .Title}}
+    </ol>
+    <h3>{{.Title}}</h3>
+    <ol>
+      {{end}}
+      {{if .Summary}}<li><strong>{{.Summary}}</strong><br>{{md .Text}}</li>
       {{else}}<li>{{md .Text}}</li>
       {{end}}
     {{end}}

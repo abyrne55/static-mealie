@@ -138,8 +138,23 @@
       margin-bottom: 0.5rem;
     }
 
+    article {
+      counter-reset: step;
+    }
+
+    article ol {
+      list-style: none;
+      padding-left: 1.5rem;
+    }
+
     article ol li {
       margin-bottom: 1.0rem;
+    }
+
+    article ol li::before {
+      counter-increment: step;
+      content: counter(step) ". ";
+      font-weight: bold;
     }
 
     .back-link {

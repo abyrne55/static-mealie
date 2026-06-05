@@ -195,7 +195,9 @@ var recipes = []recipe{
 			{ID: "salad-2", Title: "", Text: "Whisk together olive oil, red wine vinegar, and oregano. Season with salt and pepper."},
 			{ID: "salad-3", Title: "", Text: "Pour dressing over vegetables and toss gently. Top with crumbled feta cheese. Serve immediately."},
 		},
-		Notes: nil,
+		Notes: []note{
+			{Title: "", Text: "For the best flavor, use high-quality extra-virgin olive oil and let the salad sit for 5 minutes before serving so the vegetables absorb the dressing."},
+		},
 	},
 	{
 		ID:                  "chicken-tikka-masala",

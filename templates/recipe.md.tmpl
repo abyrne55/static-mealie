@@ -20,7 +20,9 @@
 
 ## Instructions
 {{range $i, $step := .Instructions}}
-{{inc $i}}. {{if $step.Title}}**{{$step.Title}}** {{else if $step.Summary}}**{{$step.Summary}}** {{end}}{{$step.Text}}
+{{if $step.Title}}
+### {{$step.Title}}
+{{end}}{{inc $i}}. {{if $step.Summary}}**{{$step.Summary}}**: {{end}}{{$step.Text}}
 {{- end}}
 {{if .Notes}}
 ## Notes
