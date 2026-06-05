@@ -51,6 +51,9 @@ read -p "Press Enter to stop demo and clean up" \
   && podman secret rm static-mealie-token
 ```
 
+> [!TIP]
+> If zero recipes appear, check whether [demo.mealie.io](https://demo.mealie.io) currently has any recipes — the demo site is regularly wiped and may be empty. If it is, [import](https://demo.mealie.io/g/home/r/create/url) a recipe or two ([cacio e pepe](https://cooking.nytimes.com/recipes/1020729-vegan-cacio-e-pepe), perhaps?) and try the commands above again.
+
 ### Build from source
 
 Install directly into your `$GOBIN`:
