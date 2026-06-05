@@ -25,7 +25,7 @@ This simple Golang tool...
 - Generated sites are responsive/mobile-friendly, lightweight, and support dark mode
 - Easy to run as a cron job or one-shot quadlet/systemd service
 - Written in pure Golang using only stdlib (no dependencies/mods)
-- Containerized atop a [Project Hummingbird](https://hummingbird-project.io/) base image and rebuilt/pushed to GHCR daily (read: pretty darn secure / unlikely to contain CVEs)
+- Containerized atop a [Project Hummingbird](https://hummingbird-project.io/) static base image and rebuilt/pushed to GHCR daily (read: pretty darn secure / unlikely to contain CVEs)
 
 ## Getting Started
 
@@ -41,7 +41,7 @@ curl -sf -X POST 'https://demo.mealie.io/api/auth/token' \
 # Generate the site into a Podman volume
 podman volume create static-mealie-output
 podman run --rmi \
-  -v static-mealie-output:/tmp/public \
+  -v static-mealie-output:/output \
   --secret static-mealie-token \
   -e SM_MEALIE_URL=https://demo.mealie.io \
   ghcr.io/abyrne55/static-mealie:main
@@ -85,7 +85,7 @@ go build
 ```text
 --mealie-url string      Mealie base URL (env: SM_MEALIE_URL)
 --mealie-token string    API token or file:///path (env: SM_MEALIE_TOKEN)
---out-dir string         Output directory (default: "public", env: SM_OUT_DIR)
+--out-dir string         Output directory (default: "output", env: SM_OUT_DIR)
 --out-title string       Site title (default: "Recipes", env: SM_OUT_TITLE)
 --out-base-url string    Base URL for sitemap/links; output not standards-compliant
                          unless set to an absolute URL like https://example.com
@@ -113,7 +113,7 @@ The credential file paths match the default mount points for systemd/quadlet [cr
 ## Output Structure
 
 ```text
-public/
+output/
   index.html
   sitemap.xml
   {recipe-slug}/

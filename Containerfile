@@ -9,7 +9,9 @@ RUN CGO_ENABLED=0 GOARCH=$TARGETARCH go build \
     -ldflags "-s -w" \
     -o /static-mealie .
 
-FROM quay.io/hummingbird/core-runtime:2
+FROM quay.io/hummingbird/static:latest
+
+WORKDIR /
 
 COPY --from=builder /static-mealie /usr/bin/static-mealie
 

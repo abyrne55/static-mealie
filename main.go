@@ -13,7 +13,7 @@ func main() {
 	var (
 		urlFlag     = flag.String("mealie-url", "", "Mealie base URL (env: SM_MEALIE_URL)")
 		tokenFlag   = flag.String("mealie-token", "", "API token or file:///path (env: SM_MEALIE_TOKEN)")
-		outFlag     = flag.String("out-dir", "public", "Output directory (env: SM_OUT_DIR)")
+		outFlag     = flag.String("out-dir", "output", "Output directory (env: SM_OUT_DIR)")
 		titleFlag   = flag.String("out-title", "Recipes", "Site title (env: SM_OUT_TITLE)")
 		siteURLFlag    = flag.String("out-base-url", "/", "Base URL for sitemap/links; output not standards-compliant unless set to an absolute URL like https://example.com (env: SM_OUT_BASE_URL)")
 		cleanSlateFlag = flag.Bool("clean-slate", false, "Wipe output directory before building (env: SM_CLEAN_SLATE)")
