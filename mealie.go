@@ -84,9 +84,10 @@ type IngredientFood struct {
 }
 
 type RecipeInstruction struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	Text  string `json:"text"`
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Summary string `json:"summary"`
+	Text    string `json:"text"`
 }
 
 type Note struct {

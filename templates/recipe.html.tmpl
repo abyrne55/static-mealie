@@ -37,6 +37,7 @@
     <ol>
     {{range .Recipe.Instructions}}
       {{if .Title}}<li><strong>{{.Title}}</strong><br>{{md .Text}}</li>
+      {{else if .Summary}}<li><strong>{{.Summary}}</strong><br>{{md .Text}}</li>
       {{else}}<li>{{md .Text}}</li>
       {{end}}
     {{end}}

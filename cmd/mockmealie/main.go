@@ -70,9 +70,10 @@ type ingredientFood struct {
 }
 
 type instruction struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	Text  string `json:"text"`
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Summary string `json:"summary"`
+	Text    string `json:"text"`
 }
 
 type note struct {
@@ -154,8 +155,8 @@ var recipes = []recipe{
 		},
 		RecipeInstructions: []instruction{
 			{ID: "cookies-1", Title: "", Text: "Preheat oven to 375°F (190°C)."},
-			{ID: "cookies-2", Title: "", Text: "Combine flour, baking soda, and salt in a bowl. Set aside."},
-			{ID: "cookies-3", Title: "", Text: "Beat butter, granulated sugar, brown sugar, and vanilla extract in a large mixing bowl until creamy."},
+			{ID: "cookies-2", Title: "", Summary: "Combine dry", Text: "Combine flour, baking soda, and salt in a bowl. Set aside."},
+			{ID: "cookies-3", Title: "", Summary: "Cream butter/sugar", Text: "Beat butter, granulated sugar, brown sugar, and vanilla extract in a large mixing bowl until creamy."},
 			{ID: "cookies-4", Title: "", Text: "Add eggs to butter mixture, one at a time, beating well after each addition."},
 			{ID: "cookies-5", Title: "", Text: "Gradually beat in the flour mixture. Stir in chocolate chips."},
 			{ID: "cookies-6", Title: "", Text: "Drop rounded tablespoons of dough onto ungreased baking sheets."},
