@@ -31,10 +31,10 @@ type recipe struct {
 	RecipeServings      float64       `json:"recipeServings"`
 	RecipeYield         string        `json:"recipeYield"`
 	RecipeYieldQuantity float64       `json:"recipeYieldQuantity"`
-	TotalTime           string        `json:"totalTime"`
-	PrepTime            string        `json:"prepTime"`
-	CookTime            string        `json:"cookTime"`
-	PerformTime         string        `json:"performTime"`
+	TotalTime           *string       `json:"totalTime"`
+	PrepTime            *string       `json:"prepTime"`
+	CookTime            *string       `json:"cookTime"`
+	PerformTime         *string       `json:"performTime"`
 	Description         string        `json:"description"`
 	DateAdded           string        `json:"dateAdded"`
 	DateUpdated         string        `json:"dateUpdated"`
@@ -81,6 +81,8 @@ type note struct {
 	Text  string `json:"text"`
 }
 
+func sp(s string) *string { return &s }
+
 var recipes = []recipe{
 	{
 		ID:                  "classic-spaghetti-bolognese",
@@ -89,10 +91,10 @@ var recipes = []recipe{
 		Image:               "bolognese",
 		RecipeYield:         "servings",
 		RecipeYieldQuantity: 4,
-		TotalTime:           "1 hour 15 minutes",
-		PrepTime:            "15 minutes",
-		CookTime:            "1 hour",
-		PerformTime:         "",
+		TotalTime:           sp("1 hour 15 minutes"),
+		PrepTime:            sp("15 minutes"),
+		CookTime:            sp("1 hour"),
+		PerformTime:         nil,
 		Description:         "A rich and hearty Italian meat sauce served over perfectly cooked spaghetti. This classic recipe uses a slow-simmered combination of beef, tomatoes, and aromatic vegetables.",
 		DateAdded:           "2024-01-15",
 		DateUpdated:         "2024-06-01",
@@ -131,10 +133,10 @@ var recipes = []recipe{
 		Image:               "cookies",
 		RecipeYield:         "cookies",
 		RecipeYieldQuantity: 24,
-		TotalTime:           "35 minutes",
-		PrepTime:            "15 minutes",
-		CookTime:            "10 minutes",
-		PerformTime:         "",
+		TotalTime:           sp("35 minutes"),
+		PrepTime:            sp("15 minutes"),
+		CookTime:            sp("10 minutes"),
+		PerformTime:         nil,
 		Description:         "Classic homemade chocolate chip cookies that are crispy on the edges and chewy in the center. A timeless favorite for cookie lovers of all ages.",
 		DateAdded:           "2024-02-10",
 		DateUpdated:         "2024-02-10",
@@ -169,10 +171,10 @@ var recipes = []recipe{
 		Image:               "greek-salad",
 		RecipeYield:         "servings",
 		RecipeYieldQuantity: 4,
-		TotalTime:           "15 minutes",
-		PrepTime:            "15 minutes",
-		CookTime:            "",
-		PerformTime:         "",
+		TotalTime:           sp("15 minutes"),
+		PrepTime:            sp("15 minutes"),
+		CookTime:            nil,
+		PerformTime:         nil,
 		Description:         "A refreshing and colorful Greek salad with crisp vegetables, tangy feta cheese, and a simple olive oil dressing.",
 		DateAdded:           "2024-03-05",
 		DateUpdated:         "2024-03-05",
@@ -204,10 +206,10 @@ var recipes = []recipe{
 		Image:               "tikka-masala",
 		RecipeYield:         "servings",
 		RecipeYieldQuantity: 6,
-		TotalTime:           "1 hour",
-		PrepTime:            "20 minutes",
-		CookTime:            "40 minutes",
-		PerformTime:         "",
+		TotalTime:           sp("1 hour"),
+		PrepTime:            sp("20 minutes"),
+		CookTime:            sp("40 minutes"),
+		PerformTime:         nil,
 		Description:         "Tender chunks of marinated chicken in a creamy, spiced tomato sauce. Serve with basmati rice or warm naan bread for a satisfying meal.",
 		DateAdded:           "2024-04-12",
 		DateUpdated:         "2024-05-20",
@@ -249,10 +251,10 @@ var recipes = []recipe{
 		Image:               "banana-bread",
 		RecipeYield:         "loaf",
 		RecipeYieldQuantity: 1,
-		TotalTime:           "1 hour 10 minutes",
-		PrepTime:            "10 minutes",
-		CookTime:            "1 hour",
-		PerformTime:         "",
+		TotalTime:           sp("1 hour 10 minutes"),
+		PrepTime:            sp("10 minutes"),
+		CookTime:            sp("1 hour"),
+		PerformTime:         nil,
 		Description:         "Moist and flavorful banana bread made with overripe bananas. Simple to make and perfect for breakfast or as a snack.",
 		DateAdded:           "2024-05-01",
 		DateUpdated:         "2024-05-01",
@@ -283,13 +285,13 @@ var recipes = []recipe{
 		Name:                "French Onion Soup",
 		Slug:                "french-onion-soup",
 		Image:               nil,
-		RecipeServings:      4,
+		RecipeServings:      4.0,
 		RecipeYield:         "",
 		RecipeYieldQuantity: 0,
-		TotalTime:           "1 hour 30 minutes",
-		PrepTime:            "20 minutes",
-		CookTime:            "1 hour 10 minutes",
-		PerformTime:         "",
+		TotalTime:           sp("1 hour 30 minutes"),
+		PrepTime:            sp("20 minutes"),
+		CookTime:            sp("1 hour 10 minutes"),
+		PerformTime:         nil,
 		Description:         "Rich, deeply caramelized onion soup topped with crusty bread and melted Gruyère cheese. A French bistro classic that's surprisingly easy to make at home.",
 		DateAdded:           "2024-06-15",
 		DateUpdated:         "2024-06-15",
@@ -405,7 +407,7 @@ func main() {
 	flag.Parse()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/recipes/", func(w http.ResponseWriter, r *http.Request) {
+	recipesHandler := func(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(r.URL.Path, "/api/recipes")
 		path = strings.TrimPrefix(path, "/")
 		path = strings.TrimSuffix(path, "/")
@@ -415,7 +417,9 @@ func main() {
 		} else {
 			handleRecipeGet(w, r)
 		}
-	})
+	}
+	mux.HandleFunc("/api/recipes", recipesHandler)
+	mux.HandleFunc("/api/recipes/", recipesHandler)
 	mux.HandleFunc("/api/media/recipes/", handleRecipeImage)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
