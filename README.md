@@ -74,6 +74,8 @@ go build
 
 ## Demo Site
 
+**[https://abyrne55.github.io/static-mealie/](https://abyrne55.github.io/static-mealie/)**
+
 A live demo is deployed automatically via GitHub Pages on every push to `main`. It uses a built-in mock Mealie server with sample recipes — no real Mealie instance needed.
 
 ## Mock Server
