@@ -72,6 +72,21 @@ go build
 ./static-mealie --help
 ```
 
+## Demo Site
+
+A live demo is deployed automatically via GitHub Pages on every push to `main`. It uses a built-in mock Mealie server with sample recipes — no real Mealie instance needed.
+
+## Mock Server
+
+The `cmd/mockmealie/` directory contains a standalone mock Mealie API server with embedded sample recipes and images. Useful for development and testing without a live Mealie instance:
+
+```sh
+go run ./cmd/mockmealie                # starts on :9925
+go run . --mealie-url http://localhost:9925 --mealie-token mock --out-dir output -v
+```
+
+The mock server accepts any Bearer token and serves 6 sample recipes covering various features (ingredient sections, fractional quantities, inline markdown, notes, and missing images).
+
 ## Reference
 
 ### Flags

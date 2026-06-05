@@ -31,9 +31,9 @@ func NewClient(baseURL, apiToken string) *Client {
 
 type PaginatedResponse struct {
 	Page       int      `json:"page"`
-	PerPage    int      `json:"perPage"`
+	PerPage    int      `json:"per_page"`
 	Total      int      `json:"total"`
-	TotalPages int      `json:"totalPages"`
+	TotalPages int      `json:"total_pages"`
 	Items      []Recipe `json:"items"`
 }
 
@@ -42,6 +42,7 @@ type Recipe struct {
 	Name               string              `json:"name"`
 	Slug               string              `json:"slug"`
 	Image              any                 `json:"image"`
+	RecipeServings         float64             `json:"recipeServings"`
 	RecipeYield            string              `json:"recipeYield"`
 	RecipeYieldQuantity    float64             `json:"recipeYieldQuantity"`
 	TotalTime          string              `json:"totalTime"`

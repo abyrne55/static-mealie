@@ -1,0 +1,48 @@
+name: Deploy Demo Site
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build binaries
+        run: |
+          go build -o static-mealie .
+          go build -o mockmealie ./cmd/mockmealie
+      - name: Generate demo site
+        run: |
+          ./mockmealie &
+          sleep 1
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          ./static-mealie \
+            --mealie-url http://localhost:9925 \
+            --mealie-token mock \
+            --out-dir demo-output \
+            --out-base-url "$PAGES_URL" \
+            --out-title "Recipes (Demo)" \
+            -v
+          kill %1
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: demo-output
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,4 +1,5 @@
 dist/
 output/
 static-mealie
+cmd/mockmealie/mockmealie
 .tmp/

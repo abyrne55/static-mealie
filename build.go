@@ -88,7 +88,7 @@ type SchemaStep struct {
 	Text string `json:"text"`
 }
 
-func formatYield(yield string, qty float64) string {
+func formatYield(yield string, qty, servings float64) string {
 	if qty > 0 && yield != "" {
 		q := int(qty)
 		if float64(q) == qty {
@@ -103,7 +103,17 @@ func formatYield(yield string, qty float64) string {
 		}
 		return fmt.Sprintf("%g", qty)
 	}
-	return yield
+	if yield != "" {
+		return yield
+	}
+	if servings > 0 {
+		s := int(servings)
+		if float64(s) == servings {
+			return fmt.Sprintf("%d servings", s)
+		}
+		return fmt.Sprintf("%g servings", servings)
+	}
+	return ""
 }
 
 func recipeToView(r Recipe, hasImage bool) RecipeView {
@@ -111,7 +121,7 @@ func recipeToView(r Recipe, hasImage bool) RecipeView {
 		Name:        r.Name,
 		Slug:        r.Slug,
 		Description: r.Description,
-		RecipeYield: formatYield(r.RecipeYield, r.RecipeYieldQuantity),
+		RecipeYield: formatYield(r.RecipeYield, r.RecipeYieldQuantity, r.RecipeServings),
 		PrepTime:    r.PrepTime,
 		CookTime:    r.CookTime,
 		TotalTime:   r.TotalTime,
