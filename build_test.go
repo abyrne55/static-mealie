@@ -303,6 +303,75 @@ func TestBuildNoClobberWritesNewFiles(t *testing.T) {
 	}
 }
 
+func TestBasePath(t *testing.T) {
+	tests := []struct {
+		siteURL string
+		want    string
+	}{
+		{"/", "/"},
+		{"https://example.com", "/"},
+		{"https://example.com/", "/"},
+		{"https://example.com/sub", "/sub/"},
+		{"https://example.com/sub/", "/sub/"},
+		{"https://user.github.io/repo", "/repo/"},
+		{"https://user.github.io/repo/", "/repo/"},
+	}
+	for _, tt := range tests {
+		got := basePath(tt.siteURL)
+		if got != tt.want {
+			t.Errorf("basePath(%q) = %q, want %q", tt.siteURL, got, tt.want)
+		}
+	}
+}
+
+func TestBuildSubpathLinks(t *testing.T) {
+	outDir := t.TempDir()
+
+	site := &Site{Title: "Recipes", SiteURL: "https://user.github.io/my-recipes/", OutDir: outDir}
+	if err := site.Build(testRecipes(), map[string][]byte{"id-1": []byte("img")}); err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	indexData, err := os.ReadFile(filepath.Join(outDir, "index.html"))
+	if err != nil {
+		t.Fatalf("read index.html: %v", err)
+	}
+	indexHTML := string(indexData)
+
+	indexChecks := []string{
+		`href="/my-recipes/test-pasta/"`,
+		`href="/my-recipes/simple-salad/"`,
+		`src="/my-recipes/test-pasta/image.webp"`,
+	}
+	for _, check := range indexChecks {
+		if !strings.Contains(indexHTML, check) {
+			t.Errorf("index.html missing %q", check)
+		}
+	}
+	for _, bad := range []string{`href="/test-pasta/"`, `href="/simple-salad/"`, `src="/test-pasta/image.webp"`} {
+		if strings.Contains(indexHTML, bad) {
+			t.Errorf("index.html should not contain root-relative %q", bad)
+		}
+	}
+
+	recipeData, err := os.ReadFile(filepath.Join(outDir, "test-pasta/index.html"))
+	if err != nil {
+		t.Fatalf("read recipe html: %v", err)
+	}
+	recipeHTML := string(recipeData)
+
+	recipeChecks := []string{
+		`href="/my-recipes/"`,
+		`href="/my-recipes/test-pasta/recipe.md"`,
+		`src="/my-recipes/test-pasta/image.webp"`,
+	}
+	for _, check := range recipeChecks {
+		if !strings.Contains(recipeHTML, check) {
+			t.Errorf("recipe html missing %q", check)
+		}
+	}
+}
+
 func TestBuildJSONLD(t *testing.T) {
 	rv := recipeToView(testRecipes()[0], true)
 	jsonLD, err := buildJSONLD(rv, "https://example.com/")

@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/fs"
 	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -59,11 +60,13 @@ type RecipeView struct {
 
 type IndexData struct {
 	SiteTitle string
+	BasePath  string
 	Recipes   []RecipeView
 }
 
 type RecipeData struct {
 	SiteTitle string
+	BasePath  string
 	Recipe    RecipeView
 	JSONLD    template.HTML
 }
@@ -116,6 +119,14 @@ func formatYield(yield string, qty, servings float64) string {
 		return fmt.Sprintf("%g servings", servings)
 	}
 	return ""
+}
+
+func basePath(siteURL string) string {
+	u, err := url.Parse(siteURL)
+	if err != nil || u.Path == "" {
+		return "/"
+	}
+	return strings.TrimRight(u.Path, "/") + "/"
 }
 
 func recipeToView(r Recipe, hasImage bool) RecipeView {
@@ -288,13 +299,15 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 		}
 	}
 
+	bp := basePath(s.SiteURL)
+
 	indexPath := filepath.Join(s.OutDir, "index.html")
 	if !s.skipIfExists(indexPath) {
 		indexFile, err := os.Create(indexPath)
 		if err != nil {
 			return fmt.Errorf("create index.html: %w", err)
 		}
-		if err := indexT.ExecuteTemplate(indexFile, "base.html.tmpl", IndexData{SiteTitle: s.Title, Recipes: views}); err != nil {
+		if err := indexT.ExecuteTemplate(indexFile, "base.html.tmpl", IndexData{SiteTitle: s.Title, BasePath: bp, Recipes: views}); err != nil {
 			_ = indexFile.Close()
 			return fmt.Errorf("execute index template: %w", err)
 		}
@@ -320,7 +333,7 @@ func (s *Site) Build(recipes []Recipe, images map[string][]byte) error {
 			if err != nil {
 				return fmt.Errorf("create recipe html %s: %w", rv.Slug, err)
 			}
-			if err := recipeT.ExecuteTemplate(htmlFile, "base.html.tmpl", RecipeData{SiteTitle: s.Title, Recipe: rv, JSONLD: jsonLD}); err != nil {
+			if err := recipeT.ExecuteTemplate(htmlFile, "base.html.tmpl", RecipeData{SiteTitle: s.Title, BasePath: bp, Recipe: rv, JSONLD: jsonLD}); err != nil {
 				_ = htmlFile.Close()
 				return fmt.Errorf("execute recipe template %s: %w", rv.Slug, err)
 			}

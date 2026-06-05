@@ -4,9 +4,9 @@
 
   <div class="recipe-list">
     {{range .Recipes}}
-    <a href="/{{.Slug}}/" class="recipe-entry">
+    <a href="{{$.BasePath}}{{.Slug}}/" class="recipe-entry">
       {{if .HasImage}}
-      <img src="/{{.Slug}}/image.webp" alt="" class="recipe-thumb" loading="lazy">
+      <img src="{{$.BasePath}}{{.Slug}}/image.webp" alt="" class="recipe-thumb" loading="lazy">
       {{end}}
       <div>
         <h2>{{.Name}}</h2>
