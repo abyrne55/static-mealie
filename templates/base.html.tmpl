@@ -148,17 +148,18 @@
 
     article ol {
       list-style: none;
-      padding-left: 1.5rem;
+      padding-left: 0;
     }
 
     article ol li {
       margin-bottom: 1.0rem;
+      padding-left: 2em;
+      text-indent: -1.2em;
     }
 
     article ol li::before {
       counter-increment: step;
       content: counter(step) ". ";
-      font-weight: bold;
     }
 
     .back-link {
