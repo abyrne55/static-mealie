@@ -267,7 +267,7 @@ var recipes = []recipe{
 			{Quantity: 1, Unit: nil, Food: &ingredientFood{Name: "egg", PluralName: "eggs"}, Display: "1 egg"},
 			{Quantity: 1, Unit: &ingredientUnit{Name: "teaspoon", Abbreviation: "tsp", UseAbbreviation: true}, Food: &ingredientFood{Name: "vanilla extract"}, Display: "1 tsp vanilla extract"},
 			{Quantity: 1, Unit: &ingredientUnit{Name: "teaspoon", Abbreviation: "tsp", UseAbbreviation: true}, Food: &ingredientFood{Name: "baking soda"}, Display: "1 tsp baking soda"},
-			{Display: "pinch of salt"},
+			{Quantity: 1, Unit: &ingredientUnit{Name: "pinch", PluralName: "pinches"}, Food: &ingredientFood{Name: "salt"}, Display: "1 pinch salt"},
 			{Quantity: 1.5, Unit: &ingredientUnit{Name: "cup", PluralName: "cups"}, Food: &ingredientFood{Name: "all-purpose flour"}, Display: "1½ cups all-purpose flour"},
 		},
 		RecipeInstructions: []instruction{
