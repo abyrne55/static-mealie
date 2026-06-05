@@ -5,6 +5,7 @@
     <h1>{{.Recipe.Name}}</h1>
     <p class="recipe-meta">
       <time datetime="{{.Recipe.DateISO}}">{{.Recipe.DateFormatted}}</time>
+      {{if .Recipe.UpdatedFormatted}} &middot; Updated <time datetime="{{.Recipe.UpdatedISO}}">{{.Recipe.UpdatedFormatted}}</time>{{end}}
        &middot; <a href="/{{.Recipe.Slug}}/recipe.md">View as Markdown</a>
     </p>
     {{if .Recipe.HasImage}}

@@ -46,8 +46,10 @@ type RecipeView struct {
 	CookTime      string
 	TotalTime     string
 	PerformTime   string
-	DateISO       string
-	DateFormatted string
+	DateISO            string
+	DateFormatted      string
+	UpdatedISO         string
+	UpdatedFormatted   string
 	HasImage      bool
 	Ingredients   []RenderedIngredient
 	Instructions  []RecipeInstruction
@@ -141,6 +143,20 @@ func recipeToView(r Recipe, hasImage bool) RecipeView {
 		rv.DateISO = dateStr[:min(len(dateStr), 10)]
 		if t, err := time.Parse("2006-01-02", rv.DateISO); err == nil {
 			rv.DateFormatted = t.Format("January 2, 2006")
+		}
+	}
+
+	updatedStr := r.DateUpdated
+	if updatedStr == "" {
+		updatedStr = r.UpdatedAt
+	}
+	if updatedStr != "" {
+		updatedISO := updatedStr[:min(len(updatedStr), 10)]
+		if updatedISO != rv.DateISO {
+			rv.UpdatedISO = updatedISO
+			if t, err := time.Parse("2006-01-02", updatedISO); err == nil {
+				rv.UpdatedFormatted = t.Format("January 2, 2006")
+			}
 		}
 	}
 
