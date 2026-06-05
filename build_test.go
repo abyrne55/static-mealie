@@ -19,8 +19,7 @@ func testRecipes() []Recipe {
 			RecipeIngredient: []Ingredient{
 				{Quantity: 1, Unit: &IngredientUnit{Name: "pound"}, Food: &IngredientFood{Name: "pasta"}},
 				{Quantity: 2, Unit: &IngredientUnit{Name: "tablespoon", PluralName: "tablespoons"}, Food: &IngredientFood{Name: "olive oil"}},
-				{Title: "For the sauce"},
-				{Quantity: 0.5, Unit: &IngredientUnit{Name: "cup"}, Food: &IngredientFood{Name: "cream"}},
+				{Title: "For the sauce", Quantity: 0.5, Unit: &IngredientUnit{Name: "cup"}, Food: &IngredientFood{Name: "cream"}},
 			},
 			RecipeInstructions: []RecipeInstruction{
 				{Text: "Boil pasta in salted water."},

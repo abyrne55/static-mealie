@@ -128,8 +128,8 @@ func TestIngredientRender(t *testing.T) {
 		},
 		{
 			name: "section heading",
-			ing:  Ingredient{Title: "For the sauce"},
-			want: RenderedIngredient{IsHeading: true, Heading: "For the sauce"},
+			ing:  Ingredient{Title: "For the sauce", Quantity: 1, Unit: &IngredientUnit{Name: "pound"}, Food: &IngredientFood{Name: "ground beef"}},
+			want: RenderedIngredient{IsHeading: true, Heading: "For the sauce", AmountStr: "1 pound", FoodStr: "ground beef"},
 		},
 		{
 			name: "no unit no food — display fallback",

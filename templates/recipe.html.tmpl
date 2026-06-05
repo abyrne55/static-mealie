@@ -26,9 +26,10 @@
     </ul>
     <h3>{{.Heading}}</h3>
     <ul>
-      {{else if .Display}}
+      {{end}}
+      {{if .Display}}
         <li><input type="checkbox"> {{md .Display}}</li>
-      {{else}}
+      {{else if or .AmountStr .FoodStr}}
         <li><input type="checkbox"> {{if .AmountStr}}{{.AmountStr}} {{end}}{{if .FoodStr}}<strong>{{.FoodStr}}</strong>{{end}}{{if .NoteStr}}<span class="ingredient-note">{{.NoteStr}}</span>{{end}}</li>
       {{end}}
     {{end}}

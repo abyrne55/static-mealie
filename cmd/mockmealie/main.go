@@ -100,8 +100,7 @@ var recipes = []recipe{
 		UpdatedAt:           "2024-06-01T14:00:00Z",
 		OrgURL:              "https://example.com/bolognese",
 		RecipeIngredient: []ingredient{
-			{Title: "For the sauce"},
-			{Quantity: 1, Unit: &ingredientUnit{Name: "pound", PluralName: "pounds"}, Food: &ingredientFood{Name: "ground beef", PluralName: "ground beef"}, Display: "1 pound ground beef"},
+			{Title: "For the sauce", Quantity: 1, Unit: &ingredientUnit{Name: "pound", PluralName: "pounds"}, Food: &ingredientFood{Name: "ground beef", PluralName: "ground beef"}, Display: "1 pound ground beef"},
 			{Quantity: 1, Unit: nil, Food: &ingredientFood{Name: "onion", PluralName: "onions"}, Note: "diced", Display: "1 onion, diced"},
 			{Quantity: 3, Unit: nil, Food: &ingredientFood{Name: "clove garlic", PluralName: "cloves garlic"}, Note: "minced", Display: "3 cloves garlic, minced"},
 			{Quantity: 1, Unit: &ingredientUnit{Name: "can", PluralName: "cans"}, Food: &ingredientFood{Name: "crushed tomatoes"}, Note: "28 oz", Display: "1 can (28 oz) crushed tomatoes"},
@@ -109,8 +108,7 @@ var recipes = []recipe{
 			{Quantity: 1, Unit: &ingredientUnit{Name: "teaspoon", PluralName: "teaspoons", Abbreviation: "tsp", UseAbbreviation: true}, Food: &ingredientFood{Name: "dried oregano"}, Display: "1 tsp dried oregano"},
 			{Quantity: 1, Unit: &ingredientUnit{Name: "teaspoon", PluralName: "teaspoons", Abbreviation: "tsp", UseAbbreviation: true}, Food: &ingredientFood{Name: "dried basil"}, Display: "1 tsp dried basil"},
 			{Display: "salt and pepper to taste"},
-			{Title: "For the pasta"},
-			{Quantity: 1, Unit: &ingredientUnit{Name: "pound", PluralName: "pounds"}, Food: &ingredientFood{Name: "spaghetti"}, Display: "1 pound spaghetti"},
+			{Title: "For the pasta", Quantity: 1, Unit: &ingredientUnit{Name: "pound", PluralName: "pounds"}, Food: &ingredientFood{Name: "spaghetti"}, Display: "1 pound spaghetti"},
 			{Display: "salted water for boiling"},
 		},
 		RecipeInstructions: []instruction{

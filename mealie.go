@@ -105,10 +105,6 @@ type RenderedIngredient struct {
 }
 
 func (ing *Ingredient) Render() RenderedIngredient {
-	if ing.Title != "" {
-		return RenderedIngredient{IsHeading: true, Heading: ing.Title}
-	}
-
 	if ing.Unit == nil && ing.Food == nil {
 		display := ing.Display
 		if display == "" {
@@ -118,6 +114,10 @@ func (ing *Ingredient) Render() RenderedIngredient {
 	}
 
 	ri := RenderedIngredient{}
+	if ing.Title != "" {
+		ri.IsHeading = true
+		ri.Heading = ing.Title
+	}
 
 	var amountParts []string
 	if ing.Quantity > 0 {

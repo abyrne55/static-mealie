@@ -11,9 +11,10 @@
 {{range .Ingredients}}
 {{- if .IsHeading}}
 ### {{.Heading}}
-{{else if .Display}}
+{{end}}
+{{- if .Display}}
 - [ ] {{.Display}}
-{{- else}}
+{{- else if or .AmountStr .FoodStr}}
 - [ ] {{if .AmountStr}}{{.AmountStr}} {{end}}{{.FoodStr}}{{if .NoteStr}}, {{.NoteStr}}{{end}}
 {{- end}}
 {{- end}}
