@@ -1,34 +1,88 @@
 # static-mealie
 
-A CLI tool that exports recipes from a [Mealie](https://mealie.io) instance as a complete static HTML website — no Hugo, no JavaScript, no external dependencies.
+A CLI tool that generates a ready-to-deploy static HTML website full of recipes from your [Mealie](https://mealie.io) instance. Great for sharing your recipes with the world without directly exposing Mealie itself to the internet. Inspired by [iamkirkbater/mealie-markdown-exporter](https://github.com/iamkirkbater/mealie-markdown-exporter).
 
-## Features
-
-- Generates a static site with [Simple.css](https://simplecss.org/) styling and dark mode support
-- Structured ingredient data with Unicode vulgar fractions (½, ¼, ⅓, etc.)
-- JSON-LD schema.org/Recipe embedded in each recipe page
-- Markdown versions of each recipe with checkbox ingredients
-- XML sitemap for search engines
-- Recipe images downloaded and served alongside HTML
-- Zero external Go dependencies (stdlib only)
-
-## Installation
-
-Build from source:
-
-```sh
-go build -o static-mealie .
-```
-
-## Usage
+## How It Works
 
 ```sh
 static-mealie --mealie-url https://your-mealie-instance --mealie-token your-token
 ```
 
+This simple Golang tool...
+
+1. Uses the Mealie API token you provide to fetch all recipes (including their images and notes) from the target Mealie instance.
+2. Renders each recipe into Markdown, JSON-LD (schema.org/Recipe), and HTML (with [Simple.css](https://simplecss.org/) styling).
+3. Generates a top-level listing page and XML sitemap.
+4. Spits all of that out into a directory usable by any static web server.
+
+### Feature Highlights
+
+- Produces completely static websites composed of…
+  - …HTML+CSS for your human friends
+  - …XML for search engines
+  - …Markdown and JSON-LD for parsers (e.g., Mealie's import-recipe-from-URL tool), AI agents, and everyone else
+  - …not a single line of Javascript or CGI/server-side scripts
+- Generated sites are responsive/mobile-friendly, lightweight, and support dark mode
+- Easy to run as a cron job or one-shot quadlet/systemd service
+- Written in pure Golang using only stdlib (no dependencies/mods)
+- Containerized atop a [Project Hummingbird](https://hummingbird-project.io/) base image and rebuilt/pushed to GHCR daily (read: pretty darn secure / unlikely to contain CVEs)
+
+## Getting Started
+
+### Podman/Docker Quick Start (recommended)
+
+```sh
+# Log in to demo.mealie.io and store the JWT as a Podman secret
+curl -sf -X POST 'https://demo.mealie.io/api/auth/token' \
+  -d 'username=changeme@example.com&password=MyPassword' \
+  | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4 \
+  | podman secret create static-mealie-token -
+
+# Generate the site into a Podman volume
+podman volume create static-mealie-output
+podman run --rmi \
+  -v static-mealie-output:/tmp/public \
+  --secret static-mealie-token \
+  -e SM_MEALIE_URL=https://demo.mealie.io \
+  ghcr.io/abyrne55/static-mealie:main
+
+# Serve it
+podman run -d --rmi --name recipes-httpd \
+  -v static-mealie-output:/usr/local/apache2/htdocs/:ro \
+  --publish 8181:8080 \
+  quay.io/hummingbird/httpd:latest
+
+# Open it in your browser (on macOS, replace "xdg-open" with just "open")
+xdg-open "http://127.0.0.1:8181/" 
+
+# Clean up
+read -p "Press Enter to stop demo and clean up" \
+  && podman rm -f recipes-httpd \
+  && podman volume rm static-mealie-output \
+  && podman secret rm static-mealie-token
+```
+
+### Build from source
+
+Install directly into your `$GOBIN`:
+
+```sh
+go install github.com/abyrne55/static-mealie@latest
+static-mealie --help
+```
+
+Or manually clone and build from source:
+
+```sh
+git clone https://github.com/abyrne55/static-mealie.git
+cd static-mealie
+go build
+./static-mealie --help
+```
+
 ### Flags
 
-```
+```text
 --mealie-url string      Mealie base URL (env: SM_MEALIE_URL)
 --mealie-token string    API token or file:///path (env: SM_MEALIE_TOKEN)
 --out-dir string         Output directory (default: "public", env: SM_OUT_DIR)
@@ -43,6 +97,8 @@ static-mealie --mealie-url https://your-mealie-instance --mealie-token your-toke
 
 `--clean-slate` and `--no-clobber` are mutually exclusive.
 
+## Technical Details
+
 ### Token Resolution
 
 The API token is resolved from the first available source:
@@ -52,28 +108,11 @@ The API token is resolved from the first available source:
 3. `/run/credentials/static-mealie-token` file
 4. `/run/secrets/static-mealie-token` file
 
-The credential file paths match the default mount points for Podman secrets and Kubernetes secrets/projected volumes.
-
-## Container
-
-Images are published to `ghcr.io/abyrne55/static-mealie` for `linux/amd64` and `linux/arm64`.
-
-```sh
-# Store your API token as a Podman secret
-podman secret create static-mealie-token /path/to/token
-
-# Generate the site into ./output
-podman run --rm \
-  -v ./output:/output:U,Z \
-  --secret static-mealie-token \
-  ghcr.io/abyrne55/static-mealie:main \
-  --mealie-url https://your-mealie-instance \
-  --out-dir /output
-```
+The credential file paths match the default mount points for systemd/quadlet [credentials](https://systemd.io/CREDENTIALS/) (`LoadCredential=`/`$CREDENTIALS_DIRECTORY`) and Podman/K8s [secrets](https://docs.podman.io/en/latest/markdown/podman-secret-create.1.html).
 
 ## Output Structure
 
-```
+```text
 public/
   index.html
   sitemap.xml
