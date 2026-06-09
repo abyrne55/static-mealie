@@ -33,8 +33,7 @@ type recipe struct {
 	RecipeYieldQuantity float64       `json:"recipeYieldQuantity"`
 	TotalTime           *string       `json:"totalTime"`
 	PrepTime            *string       `json:"prepTime"`
-	CookTime            *string       `json:"cookTime"`
-	PerformTime         *string       `json:"performTime"`
+	CookTime            *string       `json:"performTime"`
 	Description         string        `json:"description"`
 	DateAdded           string        `json:"dateAdded"`
 	DateUpdated         string        `json:"dateUpdated"`
@@ -94,7 +93,6 @@ var recipes = []recipe{
 		TotalTime:           sp("1 hour 15 minutes"),
 		PrepTime:            sp("15 minutes"),
 		CookTime:            sp("1 hour"),
-		PerformTime:         nil,
 		Description:         "A rich and hearty Italian meat sauce served over perfectly cooked spaghetti. This classic recipe uses a slow-simmered combination of beef, tomatoes, and aromatic vegetables.",
 		DateAdded:           "2024-01-15",
 		DateUpdated:         "2024-06-01",
@@ -136,7 +134,6 @@ var recipes = []recipe{
 		TotalTime:           sp("35 minutes"),
 		PrepTime:            sp("15 minutes"),
 		CookTime:            sp("10 minutes"),
-		PerformTime:         nil,
 		Description:         "Classic homemade chocolate chip cookies that are crispy on the edges and chewy in the center. A timeless favorite for cookie lovers of all ages.",
 		DateAdded:           "2024-02-10",
 		DateUpdated:         "2024-02-10",
@@ -174,7 +171,6 @@ var recipes = []recipe{
 		TotalTime:           sp("15 minutes"),
 		PrepTime:            sp("15 minutes"),
 		CookTime:            nil,
-		PerformTime:         nil,
 		Description:         "A refreshing and colorful Greek salad with crisp vegetables, tangy feta cheese, and a simple olive oil dressing.",
 		DateAdded:           "2024-03-05",
 		DateUpdated:         "2024-03-05",
@@ -209,7 +205,6 @@ var recipes = []recipe{
 		TotalTime:           sp("1 hour"),
 		PrepTime:            sp("20 minutes"),
 		CookTime:            sp("40 minutes"),
-		PerformTime:         nil,
 		Description:         "Tender chunks of marinated chicken in a creamy, spiced tomato sauce. Serve with basmati rice or warm naan bread for a satisfying meal.",
 		DateAdded:           "2024-04-12",
 		DateUpdated:         "2024-05-20",
@@ -254,7 +249,6 @@ var recipes = []recipe{
 		TotalTime:           sp("1 hour 10 minutes"),
 		PrepTime:            sp("10 minutes"),
 		CookTime:            sp("1 hour"),
-		PerformTime:         nil,
 		Description:         "Moist and flavorful banana bread made with overripe bananas. Simple to make and perfect for breakfast or as a snack.",
 		DateAdded:           "2024-05-01",
 		DateUpdated:         "2024-05-01",
@@ -291,7 +285,6 @@ var recipes = []recipe{
 		TotalTime:           sp("1 hour 30 minutes"),
 		PrepTime:            sp("20 minutes"),
 		CookTime:            sp("1 hour 10 minutes"),
-		PerformTime:         nil,
 		Description:         "Rich, deeply caramelized onion soup topped with crusty bread and melted Gruyère cheese. A French bistro classic that's surprisingly easy to make at home.",
 		DateAdded:           "2024-06-15",
 		DateUpdated:         "2024-06-15",

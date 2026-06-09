@@ -46,7 +46,6 @@ type RecipeView struct {
 	PrepTime      string
 	CookTime      string
 	TotalTime     string
-	PerformTime   string
 	DateISO            string
 	DateFormatted      string
 	UpdatedISO         string
@@ -138,7 +137,6 @@ func recipeToView(r Recipe, hasImage bool) RecipeView {
 		PrepTime:    r.PrepTime,
 		CookTime:    r.CookTime,
 		TotalTime:   r.TotalTime,
-		PerformTime: r.PerformTime,
 		HasImage:    hasImage,
 		Notes:       r.Notes,
 		OrgURL:      r.OrgURL,

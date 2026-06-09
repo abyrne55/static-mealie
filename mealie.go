@@ -47,8 +47,7 @@ type Recipe struct {
 	RecipeYieldQuantity    float64             `json:"recipeYieldQuantity"`
 	TotalTime          string              `json:"totalTime"`
 	PrepTime           string              `json:"prepTime"`
-	CookTime           string              `json:"cookTime"`
-	PerformTime        string              `json:"performTime"`
+	CookTime           string              `json:"performTime"`
 	Description        string              `json:"description"`
 	DateAdded          string              `json:"dateAdded"`
 	DateUpdated        string              `json:"dateUpdated"`
