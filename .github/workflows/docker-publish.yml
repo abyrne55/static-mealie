@@ -1,31 +1,118 @@
 name: Docker
 
 on:
+  schedule:
+    - cron: '17 7 * * *'
   push:
     branches: [ "main" ]
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  # Decide which images to build for this event:
+  #   pull_request         -> pr-N (build only, not pushed)
+  #   push to main         -> main
+  #   push of a tag        -> that release (plus latest if it is the newest release)
+  #   schedule / dispatch  -> main AND the newest release, each rebuilt from its own source
+  #                           so base-image updates are picked up without moving release tags
+  #                           onto unreleased code.
+  resolve:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      targets: ${{ steps.targets.outputs.targets }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
+      - name: Resolve build targets
+        id: targets
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PUSH: ${{ github.event_name != 'pull_request' }}
+        run: |
+          set -euo pipefail
+          targets='[]'
+
+          add() { targets=$(jq -c --argjson t "$1" '. + [$t]' <<<"$targets"); }
+
+          # target NAME CACHE_SCOPE SHA VERSION TAG...
+          target() {
+            local name=$1 cache=$2 sha=$3 version=$4; shift 4
+            jq -nc \
+              --arg name "$name" --arg cache "$cache" --arg sha "$sha" --arg version "$version" \
+              --arg tags "$(printf 'type=raw,value=%s\n' "$@")" --argjson push "$PUSH" \
+              '{name: $name, cache: $cache, sha: $sha, version: $version, tags: $tags, push: $push}'
+          }
+
+          latest=$(git tag -l 'v*.*.*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+
+          release() {
+            local tag=$1 sha
+            sha=$(git rev-list -n1 "$tag")
+            if [[ "$tag" == "$latest" ]]; then
+              add "$(target "$tag" release "$sha" "$tag" "$tag" latest)"
+            else
+              # Pre-release or older backport: don't move latest.
+              add "$(target "$tag" release "$sha" "$tag" "$tag")"
+            fi
+          }
+
+          case "$EVENT" in
+            pull_request)
+              add "$(target "pr-$PR_NUMBER" pr "$GITHUB_SHA" "pr-$PR_NUMBER" "pr-$PR_NUMBER")"
+              ;;
+            push)
+              if [[ "$REF_TYPE" == tag ]]; then
+                release "$REF_NAME"
+              else
+                add "$(target main main "$GITHUB_SHA" main main)"
+              fi
+              ;;
+            schedule|workflow_dispatch)
+              add "$(target main main "$(git rev-parse origin/main)" main main)"
+              if [[ -n "$latest" ]]; then
+                release "$latest"
+              fi
+              ;;
+          esac
+
+          echo "targets=$targets" >> "$GITHUB_OUTPUT"
+          jq . <<<"$targets"
+
+  build:
+    name: build (${{ matrix.target.name }})
+    needs: resolve
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
       id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.resolve.outputs.targets) }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.target.sha }}
 
       - name: Install cosign
-        if: github.event_name != 'pull_request'
+        if: matrix.target.push
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 #v4.1.2
         with:
           cosign-release: 'v2.6.2'
@@ -34,7 +121,7 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
       - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
+        if: matrix.target.push
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ${{ env.REGISTRY }}
@@ -46,6 +133,11 @@ jobs:
         uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: latest=false
+          tags: ${{ matrix.target.tags }}
+          labels: |
+            org.opencontainers.image.revision=${{ matrix.target.sha }}
+            org.opencontainers.image.version=${{ matrix.target.version }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -54,15 +146,16 @@ jobs:
           context: .
           file: ./Containerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          pull: true
+          push: ${{ matrix.target.push }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.target.cache }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target.cache }}
 
       - name: Sign the published Docker image
-        if: ${{ github.event_name != 'pull_request' }}
+        if: matrix.target.push
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        run: echo "${TAGS}" | xargs -I {} cosign sign -r --yes {}@${DIGEST}
+        run: echo "${TAGS}" | xargs -I {} cosign sign -r --yes "{}@${DIGEST}"
